@@ -79,66 +79,69 @@ function generateQuestion() {
     const mode = state.modes[state.currentMode];
 
     // Difficulty scaling based on streak
-    // Level 1: streak 0-2 (small numbers)
-    // Level 2: streak 3-6 (medium numbers)
-    // Level 3: streak 7+ (large numbers)
-    const level = Math.min(Math.floor(state.streak / 3) + 1, 3);
-    const range = level === 1 ? 32 : (level === 2 ? 256 : 4096);
+    // Level 1: streak 0-2 (Min 8 bits / 4 hex digits)
+    // Level 2: streak 3-6 (Min 12 bits / 6 hex digits)
+    // Level 3: streak 7+ (Min 16 bits / 8 hex digits)
+    const level = Math.min(Math.floor(state.streak / 4) + 1, 3);
+
+    // Binary bit lengths: 8, 12, 16
+    const binBits = level === 1 ? 8 : (level === 2 ? 12 : 16);
+    const binMin = Math.pow(2, binBits - 2);
+    const binMax = Math.pow(2, binBits) - 1;
+
+    // Hex ranges: 4, 6, 8 digits
+    const hexDigits = level === 1 ? 4 : (level === 2 ? 6 : 8);
+    const hexMin = Math.pow(16, hexDigits - 1);
+    const hexMax = Math.pow(16, hexDigits) - 1;
 
     if (state.currentMode === 'bin-add') {
-        const n1 = Math.floor(Math.random() * range);
-        const n2 = Math.floor(Math.random() * range);
-        state.currentValue = n1 + n2;
+        const n1 = Math.floor(Math.random() * (binMax - binMin)) + binMin;
+        const n2 = Math.floor(Math.random() * (binMax - binMin)) + binMin;
         questionValue.textContent = `${n1.toString(2)} + ${n2.toString(2)}`;
         state.currentAnswer = (n1 + n2).toString(2);
         return;
     }
 
     if (state.currentMode === 'bin-sub') {
-        const n1 = Math.floor(Math.random() * range) + (range / 2);
-        const n2 = Math.floor(Math.random() * (range / 2));
-        state.currentValue = n1 - n2;
+        const n1 = Math.floor(Math.random() * (binMax - binMin)) + binMin;
+        const n2 = Math.floor(Math.random() * (n1 - binMin)) + binMin;
         questionValue.textContent = `${n1.toString(2)} - ${n2.toString(2)}`;
         state.currentAnswer = (n1 - n2).toString(2);
         return;
     }
 
     if (state.currentMode === 'hex-add') {
-        const n1 = Math.floor(Math.random() * range);
-        const n2 = Math.floor(Math.random() * range);
+        const n1 = Math.floor(Math.random() * (hexMax - hexMin)) + hexMin;
+        const n2 = Math.floor(Math.random() * (hexMax - hexMin)) + hexMin;
         questionValue.textContent = `${n1.toString(16).toUpperCase()} + ${n2.toString(16).toUpperCase()}`;
         state.currentAnswer = (n1 + n2).toString(16).toUpperCase();
         return;
     }
 
     if (state.currentMode === 'hex-sub') {
-        const n1 = Math.floor(Math.random() * range) + (range / 2);
-        const n2 = Math.floor(Math.random() * (range / 2));
+        const n1 = Math.floor(Math.random() * (hexMax - hexMin)) + hexMin;
+        const n2 = Math.floor(Math.random() * (n1 - hexMin)) + hexMin;
         questionValue.textContent = `${n1.toString(16).toUpperCase()} - ${n2.toString(16).toUpperCase()}`;
         state.currentAnswer = (n1 - n2).toString(16).toUpperCase();
         return;
     }
 
     if (state.currentMode === 'twos-comp') {
-        // Bit length also scales with level: 4-bit, 8-bit, 12-bit
-        const bits = level === 1 ? 4 : (level === 2 ? 8 : 12);
+        const bits = binBits;
         const maxVal = Math.pow(2, bits);
-
-        // Random binary string
         const num = Math.floor(Math.random() * maxVal);
         const binaryStr = num.toString(2).padStart(bits, '0');
 
-        // Display binary string
         questionValue.textContent = binaryStr;
 
-        // Calculate Two's Complement: 1. Flip bits (NOT) 2. Add 1 (equivalent to 2^bits - num)
         const resultVal = (maxVal - num) % maxVal;
         state.currentAnswer = resultVal.toString(2).padStart(bits, '0');
         return;
     }
 
     // Standard conversions
-    const num = Math.floor(Math.random() * range) + 1;
+    const convRange = level === 1 ? 512 : (level === 2 ? 4096 : 65536);
+    const num = Math.floor(Math.random() * convRange) + 1;
 
     switch (state.currentMode) {
         case 'dec-bin':
@@ -192,4 +195,3 @@ function updateStats() {
     scoreDisplay.textContent = state.score;
     streakDisplay.textContent = state.streak;
 }
-

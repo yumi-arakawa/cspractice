@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS Practice Hub</title>
+    <meta name="description" content="Number system conversions and operations practice.">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="bg-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <header>
+        <h1 class="logo">CS CONVERSION PRACTICE</h1>
+        <p class="subtitle">C++ is better than Python</p>
+    </header>
+
+    <main>
+        <!-- Dashboard View -->
+        <section id="dashboard" class="container">
+            <h2 style="text-align: center; margin-top: 1rem;">Select Practice Mode</h2>
+            <div class="modes-grid">
+                <!-- Modes will be handled by IDs in JS -->
+                <div class="mode-card" id="dec-bin">
+                    <div class="mode-title">Decimal to Binary</div>
+                </div>
+                <div class="mode-card" id="bin-dec">
+                    <div class="mode-title">Binary to Decimal</div>
+                </div>
+                <div class="mode-card" id="dec-hex">
+                    <div class="mode-title">Decimal to Hex</div>
+                </div>
+                <div class="mode-card" id="hex-dec">
+                    <div class="mode-title">Hex to Decimal</div>
+                </div>
+                <div class="mode-card" id="bin-hex">
+                    <div class="mode-title">Binary to Hex</div>
+                </div>
+                <div class="mode-card" id="bin-add">
+                    <div class="mode-title">Binary Addition</div>
+                </div>
+                <div class="mode-card" id="bin-sub">
+                    <div class="mode-title">Binary Subtraction</div>
+                </div>
+                <div class="mode-card" id="hex-add">
+                    <div class="mode-title">Hex Addition</div>
+                </div>
+                <div class="mode-card" id="hex-sub">
+                    <div class="mode-title">Hex Subtraction</div>
+                </div>
+                <div class="mode-card" id="twos-comp">
+                    <div class="mode-title">Two's Complement</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Practice View (Hidden by default) -->
+        <section id="practice-view" class="practice-view">
+            <button class="back-btn" id="exit-practice">← Back to Dashboard</button>
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <span class="stat-label">Mode</span>
+                    <span class="stat-value" id="current-mode-name">---</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Score</span>
+                    <span class="stat-value" id="score">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Streak</span>
+                    <span class="stat-value" id="streak">0</span>
+                </div>
+            </div>
+
+            <div class="question-card">
+                <div class="question-label" id="question-label">Convert to Binary:</div>
+                <div class="question-value" id="question-value">---</div>
+
+                <div class="input-container">
+                    <input type="text" id="answer-input" placeholder="Type your answer..." autocomplete="off">
+                </div>
+
+                <div class="feedback" id="feedback-text"></div>
+
+                <div class="controls">
+                    <button class="btn-outline" id="skip-btn">Skip question</button>
+                    <button class="btn-primary" id="check-btn">Check Answer</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer style="text-align: center; padding: 2rem; color: var(--text-dim); font-size: 0.8rem; opacity: 0.5;">
+        C++ is better than Python
+    </footer>
+    <script src="script.js"></script>
+</body>
+
+</html>

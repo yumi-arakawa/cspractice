@@ -15,7 +15,9 @@ const state = {
         'bin-sub': { name: 'Binary Subtraction', from: 2, to: 2, label: 'Calculate result in Binary:' },
         'hex-add': { name: 'Hex Addition', from: 16, to: 16, label: 'Calculate result in Hex:' },
         'hex-sub': { name: 'Hex Subtraction', from: 16, to: 16, label: 'Calculate result in Hex:' },
-        'twos-comp': { name: "Two's Complement", from: 2, to: 2, label: "Find the Two's Complement (Binary):" }
+        'twos-comp': { name: "Two's Complement", from: 2, to: 2, label: "Find the Two's Complement (Binary):" },
+        'bin-dec-float': { name: 'Binary to Decimal (Float)', from: 2, to: 10, label: 'Convert to Decimal:' },
+        'dec-bin-float': { name: 'Decimal to Binary (Float)', from: 10, to: 2, label: 'Convert to Binary:' }
     }
 };
 
@@ -139,6 +141,33 @@ function generateQuestion() {
         return;
     }
 
+    if (state.currentMode === 'bin-dec-float') {
+        const intBits = level + 2;
+        const fracBits = level + 1;
+        const intPart = Math.floor(Math.random() * Math.pow(2, intBits));
+        const fracPart = Math.floor(Math.random() * (Math.pow(2, fracBits) - 1)) + 1;
+
+        const binStr = intPart.toString(2) + "." + fracPart.toString(2).padStart(fracBits, '0').replace(/0+$/, '');
+        questionValue.textContent = binStr;
+
+        const decVal = intPart + (fracPart / Math.pow(2, fracBits));
+        state.currentAnswer = decVal.toString();
+        return;
+    }
+
+    if (state.currentMode === 'dec-bin-float') {
+        const intBits = level + 2;
+        const fracBits = level + 1;
+        const intPart = Math.floor(Math.random() * Math.pow(2, intBits));
+        const fracPart = Math.floor(Math.random() * (Math.pow(2, fracBits) - 1)) + 1;
+
+        const decVal = intPart + (fracPart / Math.pow(2, fracBits));
+        questionValue.textContent = decVal.toString();
+
+        state.currentAnswer = intPart.toString(2) + "." + fracPart.toString(2).padStart(fracBits, '0').replace(/0+$/, '');
+        return;
+    }
+
     // Standard conversions
     const convRange = level === 1 ? 512 : (level === 2 ? 4096 : 65536);
     const num = Math.floor(Math.random() * convRange) + 1;
@@ -171,7 +200,19 @@ function validateAnswer() {
     const userAns = answerInput.value.trim().toUpperCase();
     const correctAns = state.currentAnswer.toUpperCase();
 
-    if (userAns === correctAns) {
+    let isCorrect = (userAns === correctAns);
+
+    // Special handling for floats
+    if (!isCorrect && (state.currentMode === 'bin-dec-float' || state.currentMode === 'dec-bin-float')) {
+        if (state.currentMode === 'bin-dec-float') {
+            isCorrect = parseFloat(userAns) === parseFloat(correctAns);
+        } else if (state.currentMode === 'dec-bin-float') {
+            const norm = (s) => s.includes('.') ? s.replace(/0+$/, '').replace(/\.$/, '') : s;
+            isCorrect = norm(userAns) === norm(correctAns);
+        }
+    }
+
+    if (isCorrect) {
         showFeedback(true);
         state.score += 10 + (state.streak * 2);
         state.streak++;

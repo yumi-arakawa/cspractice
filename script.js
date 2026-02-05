@@ -192,3 +192,4 @@ function updateStats() {
     scoreDisplay.textContent = state.score;
     streakDisplay.textContent = state.streak;
 }
+

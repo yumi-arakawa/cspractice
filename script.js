@@ -6,6 +6,7 @@ const state = {
     score: 0,
     streak: 0,
     modes: {
+        'random': { name: 'Random Mode', label: '' },
         'dec-bin': { name: 'Decimal to Binary', from: 10, to: 2, label: 'Convert to Binary:' },
         'bin-dec': { name: 'Binary to Decimal', from: 2, to: 10, label: 'Convert to Decimal:' },
         'dec-hex': { name: 'Decimal to Hex', from: 10, to: 16, label: 'Convert to Hexadecimal:' },
@@ -18,7 +19,8 @@ const state = {
         'twos-comp': { name: "Two's Complement", from: 2, to: 2, label: "Find the Two's Complement (Binary):" },
         'bin-dec-float': { name: 'Binary to Decimal (Float)', from: 2, to: 10, label: 'Convert to Decimal:' },
         'dec-bin-float': { name: 'Decimal to Binary (Float)', from: 10, to: 2, label: 'Convert to Binary:' }
-    }
+    },
+    currentSubMode: null
 };
 
 // DOM Elements
@@ -78,25 +80,36 @@ function generateQuestion() {
     feedbackText.className = 'feedback';
     answerInput.value = '';
 
-    const mode = state.modes[state.currentMode];
+    if (state.currentMode === 'random') {
+        const modeIds = Object.keys(state.modes).filter(m => m !== 'random');
+        state.currentSubMode = modeIds[Math.floor(Math.random() * modeIds.length)];
+        questionLabel.textContent = state.modes[state.currentSubMode].label;
+        currentModeName.textContent = `Random Mode (${state.modes[state.currentSubMode].name})`;
+    } else {
+        state.currentSubMode = state.currentMode;
+    }
+
+    const mode = state.modes[state.currentSubMode];
 
     // Difficulty scaling based on streak
-    // Level 1: streak 0-2 (Min 8 bits / 4 hex digits)
-    // Level 2: streak 3-6 (Min 12 bits / 6 hex digits)
-    // Level 3: streak 7+ (Min 16 bits / 8 hex digits)
-    const level = Math.min(Math.floor(state.streak / 4) + 1, 3);
+    // Level 1: streak 0-3
+    // Level 2: streak 4-7
+    // Level 3: streak 8-11
+    // Level 4: streak 12-15
+    // Level 5: streak 16+
+    const level = Math.min(Math.floor(state.streak / 4) + 1, 5);
 
-    // Binary bit lengths: 8, 12, 16
-    const binBits = level === 1 ? 8 : (level === 2 ? 12 : 16);
+    // Binary bit lengths: 8, 12, 16, 24, 32
+    const binBits = [8, 12, 16, 24, 32][level - 1];
     const binMin = Math.pow(2, binBits - 2);
     const binMax = Math.pow(2, binBits) - 1;
 
-    // Hex ranges: 4, 6, 8 digits
-    const hexDigits = level === 1 ? 4 : (level === 2 ? 6 : 8);
+    // Hex ranges: 4, 6, 8, 10, 12 digits
+    const hexDigits = [4, 6, 8, 10, 12][level - 1];
     const hexMin = Math.pow(16, hexDigits - 1);
     const hexMax = Math.pow(16, hexDigits) - 1;
 
-    if (state.currentMode === 'bin-add') {
+    if (state.currentSubMode === 'bin-add') {
         const n1 = Math.floor(Math.random() * (binMax - binMin)) + binMin;
         const n2 = Math.floor(Math.random() * (binMax - binMin)) + binMin;
         questionValue.textContent = `${n1.toString(2)} + ${n2.toString(2)}`;
@@ -104,7 +117,7 @@ function generateQuestion() {
         return;
     }
 
-    if (state.currentMode === 'bin-sub') {
+    if (state.currentSubMode === 'bin-sub') {
         const n1 = Math.floor(Math.random() * (binMax - binMin)) + binMin;
         const n2 = Math.floor(Math.random() * (n1 - binMin)) + binMin;
         questionValue.textContent = `${n1.toString(2)} - ${n2.toString(2)}`;
@@ -112,7 +125,7 @@ function generateQuestion() {
         return;
     }
 
-    if (state.currentMode === 'hex-add') {
+    if (state.currentSubMode === 'hex-add') {
         const n1 = Math.floor(Math.random() * (hexMax - hexMin)) + hexMin;
         const n2 = Math.floor(Math.random() * (hexMax - hexMin)) + hexMin;
         questionValue.textContent = `${n1.toString(16).toUpperCase()} + ${n2.toString(16).toUpperCase()}`;
@@ -120,7 +133,7 @@ function generateQuestion() {
         return;
     }
 
-    if (state.currentMode === 'hex-sub') {
+    if (state.currentSubMode === 'hex-sub') {
         const n1 = Math.floor(Math.random() * (hexMax - hexMin)) + hexMin;
         const n2 = Math.floor(Math.random() * (n1 - hexMin)) + hexMin;
         questionValue.textContent = `${n1.toString(16).toUpperCase()} - ${n2.toString(16).toUpperCase()}`;
@@ -128,7 +141,7 @@ function generateQuestion() {
         return;
     }
 
-    if (state.currentMode === 'twos-comp') {
+    if (state.currentSubMode === 'twos-comp') {
         const bits = binBits;
         const maxVal = Math.pow(2, bits);
         const num = Math.floor(Math.random() * maxVal);
@@ -141,7 +154,7 @@ function generateQuestion() {
         return;
     }
 
-    if (state.currentMode === 'bin-dec-float') {
+    if (state.currentSubMode === 'bin-dec-float') {
         const intBits = level + 2;
         const fracBits = level + 1;
         const intPart = Math.floor(Math.random() * Math.pow(2, intBits));
@@ -155,7 +168,7 @@ function generateQuestion() {
         return;
     }
 
-    if (state.currentMode === 'dec-bin-float') {
+    if (state.currentSubMode === 'dec-bin-float') {
         const intBits = level + 2;
         const fracBits = level + 1;
         const intPart = Math.floor(Math.random() * Math.pow(2, intBits));
@@ -169,10 +182,10 @@ function generateQuestion() {
     }
 
     // Standard conversions
-    const convRange = level === 1 ? 512 : (level === 2 ? 4096 : 65536);
+    const convRange = level === 1 ? 512 : (level === 2 ? 4096 : (level === 3 ? 65536 : (level === 4 ? 1048576 : 16777216)));
     const num = Math.floor(Math.random() * convRange) + 1;
 
-    switch (state.currentMode) {
+    switch (state.currentSubMode) {
         case 'dec-bin':
             questionValue.textContent = num.toString(10);
             state.currentAnswer = num.toString(2);
@@ -203,10 +216,10 @@ function validateAnswer() {
     let isCorrect = (userAns === correctAns);
 
     // Special handling for floats
-    if (!isCorrect && (state.currentMode === 'bin-dec-float' || state.currentMode === 'dec-bin-float')) {
-        if (state.currentMode === 'bin-dec-float') {
+    if (!isCorrect && (state.currentSubMode === 'bin-dec-float' || state.currentSubMode === 'dec-bin-float')) {
+        if (state.currentSubMode === 'bin-dec-float') {
             isCorrect = parseFloat(userAns) === parseFloat(correctAns);
-        } else if (state.currentMode === 'dec-bin-float') {
+        } else if (state.currentSubMode === 'dec-bin-float') {
             const norm = (s) => s.includes('.') ? s.replace(/0+$/, '').replace(/\.$/, '') : s;
             isCorrect = norm(userAns) === norm(correctAns);
         }
